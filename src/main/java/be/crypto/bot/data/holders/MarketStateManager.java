@@ -1,6 +1,7 @@
 package be.crypto.bot.data.holders;
 
 import be.crypto.bot.config.Constants;
+import be.crypto.bot.data.ConfigHolder;
 import be.crypto.bot.domain.MarketState;
 import be.crypto.bot.domain.MarketTicker;
 import be.crypto.bot.service.AnalyseService;
@@ -28,6 +29,9 @@ public class MarketStateManager {
     private Map<String, MarketState> marketStates;
     private Map<String, MarketTicker> marketTickers;
     private Double averageGap;
+
+    @Autowired
+    private ConfigHolder configHolder;
 
     @Autowired
     private CalculationService calculationService;
@@ -81,13 +85,13 @@ public class MarketStateManager {
     }
 
     private Optional<MarketState> initMarketState(String market, Double close) {
-        Integer size = Math.max(Constants.EMA_PERIOD, Constants.RSI_PERIOD * 2 + 1);
+        Integer size = Math.max(configHolder.getSMALength(), Constants.RSI_PERIOD * 2 + 1);
         List<Candlestick> candleSticks = webService.getCandleSticks(Constants.BASE, market, CandlestickInterval.FIVE_MINUTES);
         if (candleSticks.size() < size)
             return Optional.empty();
 
         List<Double> closes = candleSticks.subList(candleSticks.size() - size, candleSticks.size()).stream().map(c -> Double.valueOf(c.getClose())).collect(Collectors.toList());
-        MarketStateHolder holder = new MarketStateHolder(closes, calculationService);
+        MarketStateHolder holder = new MarketStateHolder(closes, calculationService, configHolder);
         holders.put(market, holder);
         return Optional.of(holder.getMarketState(close));
     }

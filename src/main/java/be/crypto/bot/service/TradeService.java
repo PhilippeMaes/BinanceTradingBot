@@ -1,6 +1,7 @@
 package be.crypto.bot.service;
 
 import be.crypto.bot.config.Constants;
+import be.crypto.bot.data.ConfigHolder;
 import be.crypto.bot.data.holders.BalanceHolder;
 import be.crypto.bot.data.holders.MarketStateManager;
 import be.crypto.bot.data.holders.OrderHolder;
@@ -30,6 +31,9 @@ public class TradeService {
 
     private Map<String, Long> initialSellMap;
     private Set<String> tradesInProgress;
+    
+    @Autowired
+    private ConfigHolder configHolder;
 
     @Autowired
     private WebService webService;
@@ -115,7 +119,7 @@ public class TradeService {
                     // place sell order
                     Optional<MarketState> marketState = stateManager.getMarketState(marketName);
                     if (marketState.isPresent())
-                        placeSell(marketName, marketState.get().getSMA() * (1 + Constants.SELL_PERC_TRIGGER), true);
+                        placeSell(marketName, marketState.get().getSMA() * (1 + configHolder.getSellPercentageTrigger()), true);
                 } else {
                     // release coin
                     tradesInProgress.remove(marketName);
@@ -159,7 +163,7 @@ public class TradeService {
                     // move order
                     Optional<MarketState> marketState = stateManager.getMarketState(market);
                     if (marketState.isPresent())
-                        placeSell(market, marketState.get().getSMA() * (1 + Constants.SELL_PERC_TRIGGER), false);
+                        placeSell(market, marketState.get().getSMA() * (1 + configHolder.getSellPercentageTrigger()), false);
                 } else {
                     // release coin
                     tradesInProgress.remove(market);

@@ -1,6 +1,7 @@
 package be.crypto.bot.data.holders;
 
 import be.crypto.bot.config.Constants;
+import be.crypto.bot.data.ConfigHolder;
 import be.crypto.bot.domain.MarketState;
 import be.crypto.bot.domain.RSIResult;
 import be.crypto.bot.service.CalculationService;
@@ -14,6 +15,7 @@ import java.util.List;
 public class MarketStateHolder {
 
     private CalculationService calculationService;
+    private ConfigHolder configHolder;
 
     private List<Double> closeHolder;
     private Double previousClose;
@@ -23,8 +25,9 @@ public class MarketStateHolder {
     private RSIResult WildersRSI;
     private List<Double> RSIHolder;
 
-    public MarketStateHolder(List<Double> closes, CalculationService calculationService) {
+    public MarketStateHolder(List<Double> closes, CalculationService calculationService, ConfigHolder configHolder) {
         this.calculationService = calculationService;
+        this.configHolder = configHolder;
         this.closeHolder = new ArrayList<>();
         this.closeHolder.addAll(closes);
         this.RSIHolder = new ArrayList<>();
@@ -34,10 +37,10 @@ public class MarketStateHolder {
 
     public MarketState getMarketState(Double close) {
         closeHolder.add(close);
-        closeHolder.remove(0);
-        SMA = closeHolder.subList(closeHolder.size() - Constants.EMA_PERIOD, closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / Constants.EMA_PERIOD;
+        closeHolder = closeHolder.subList(closeHolder.size() - configHolder.getSMALength(), closeHolder.size());
+        SMA = closeHolder.stream().mapToDouble(Double::doubleValue).sum() / configHolder.getSMALength();
 
-        EMA = calculationService.getEMA(Constants.EMA_PERIOD, EMA, close);
+        EMA = calculationService.getEMA(configHolder.getSMALength(), EMA, close);
         double gain = close - previousClose;
         WildersRSI = calculationService.getWildersRSI(WildersRSI, gain);
         RSIHolder.add(WildersRSI.getRSI());
@@ -50,7 +53,7 @@ public class MarketStateHolder {
 
     public void calculateInitialMarketState() {
         int size = closeHolder.size();
-        EMA = closeHolder.subList(closeHolder.size() - Constants.EMA_PERIOD, closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / Constants.EMA_PERIOD;
+        EMA = closeHolder.subList(closeHolder.size() - configHolder.getSMALength(), closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / configHolder.getSMALength();
         SMA = EMA;
 
         WildersRSI = calculationService.getInitialRSI(closeHolder.subList(size - Constants.RSI_PERIOD * 2, size - Constants.RSI_PERIOD), closeHolder.get(closeHolder.size() - Constants.RSI_PERIOD));
@@ -64,6 +67,6 @@ public class MarketStateHolder {
         StochRSI = calculationService.getStochRSI(RSIHolder.subList(RSIHolder.size() - Constants.RSI_PERIOD, RSIHolder.size()));
 
         previousClose = closeHolder.get(closeHolder.size() - 1);
-        closeHolder = closeHolder.subList(closeHolder.size() - Constants.EMA_PERIOD, closeHolder.size());
+        closeHolder = closeHolder.subList(closeHolder.size() - configHolder.getSMALength(), closeHolder.size());
     }
 }

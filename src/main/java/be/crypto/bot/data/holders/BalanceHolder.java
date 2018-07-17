@@ -47,6 +47,10 @@ public class BalanceHolder {
         return baseBalance - baseLocked;
     }
 
+    public void setBaseBalance(Double baseBalance) {
+        this.baseBalance = baseBalance;
+    }
+
     public void lockBaseBalance(Double amount) {
         baseLocked += amount;
     }

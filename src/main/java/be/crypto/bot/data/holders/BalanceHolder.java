@@ -2,9 +2,10 @@ package be.crypto.bot.data.holders;
 
 import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.ClosedTradeService;
+import be.crypto.bot.domain.ClosedTrade;
 import be.crypto.bot.domain.OrderType;
-import be.crypto.bot.domain.Trade;
 import be.crypto.bot.service.PushOverService;
+import be.crypto.bot.service.exchange.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,9 @@ public class BalanceHolder {
 
     @Autowired
     private PushOverService pushOverService;
+
+    @Autowired
+    private WebService webService;
 
     @PostConstruct
     private void init() {
@@ -69,7 +73,7 @@ public class BalanceHolder {
         balanceMap.put(marketName, getBalance(marketName) + quantity);
         baseBalance -= quantity * rate;
         log.info("[" + marketName + "] Bought " + quantity + " @ price: " + String.format("%.8f", rate) + " >> Balance: " + String.format("%.8f", getBalance(marketName)));
-        closedTradeService.saveTrade(new Trade(marketName, quantity, rate, OrderType.BUY));
+        closedTradeService.saveTrade(new ClosedTrade(marketName, quantity, rate, OrderType.BUY));
 
         try {
             pushOverService.sendFillNotification(marketName, quantity, rate, OrderType.BUY);
@@ -82,12 +86,21 @@ public class BalanceHolder {
         balanceMap.put(marketName, getBalance(marketName) - quantity);
         baseBalance += quantity * rate;
         log.info("[" + marketName + "] Sold " + quantity + " @ price: " + String.format("%.8f", rate) + " >> BASE balance: " + String.format("%.8f", baseBalance));
-        closedTradeService.saveTrade(new Trade(marketName, quantity, rate, OrderType.SELL));
+        closedTradeService.saveTrade(new ClosedTrade(marketName, quantity, rate, OrderType.SELL));
 
         try {
             pushOverService.sendFillNotification(marketName, quantity, rate, OrderType.SELL);
         } catch (IOException e) {
             log.error("Error sending sell notification through PushOver", e);
         }
+    }
+
+    public Double getTotalBaseBalance() {
+        Double totalBaseBalance = baseBalance;
+        totalBaseBalance += balanceMap.entrySet()
+                .stream()
+                .mapToDouble(b -> Double.valueOf(webService.getTicker(b.getKey()).getLastPrice()) * b.getValue())
+                .sum();
+        return totalBaseBalance;
     }
 }

@@ -1,7 +1,7 @@
 package be.crypto.bot.data;
 
 import be.crypto.bot.domain.OrderType;
-import be.crypto.bot.domain.Trade;
+import be.crypto.bot.domain.ClosedTrade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,52 +17,52 @@ public class ClosedTradeService {
     @Autowired
     private ClosedTradeRepository closedTradeRepository;
 
-    public void saveTrade(Trade trade) {
-        closedTradeRepository.save(trade);
+    public void saveTrade(ClosedTrade closedTrade) {
+        closedTradeRepository.save(closedTrade);
     }
 
-    public List<Trade> getTrades() {
-        List<Trade> combinedTrades = new ArrayList<>();
-        Map<String, List<Trade>> tradesByMarketName = closedTradeRepository.findAll().stream().collect(Collectors.groupingBy(Trade::getMarketName));
+    public List<ClosedTrade> getTrades() {
+        List<ClosedTrade> combinedClosedTrades = new ArrayList<>();
+        Map<String, List<ClosedTrade>> tradesByMarketName = closedTradeRepository.findAll().stream().collect(Collectors.groupingBy(ClosedTrade::getMarketName));
 
-        for (Map.Entry<String, List<Trade>> trades : tradesByMarketName.entrySet()) {
+        for (Map.Entry<String, List<ClosedTrade>> trades : tradesByMarketName.entrySet()) {
             if (trades.getValue().size() == 0)
                 continue;
 
-            List<Trade> combinedTradesForMarket = new ArrayList<>();
+            List<ClosedTrade> combinedTradesForMarket = new ArrayList<>();
 
-            Iterator<Trade> iterator = trades.getValue().iterator();
-            Trade nextTrade = iterator.next();
-            OrderType orderType = nextTrade.getOrderType();
-            Double qty = nextTrade.getQuantity();
-            Double btc = nextTrade.getQuantity() * nextTrade.getAveragePrice();
-            Long timestamp = nextTrade.getTimestamp();
+            Iterator<ClosedTrade> iterator = trades.getValue().iterator();
+            ClosedTrade nextClosedTrade = iterator.next();
+            OrderType orderType = nextClosedTrade.getOrderType();
+            Double qty = nextClosedTrade.getQuantity();
+            Double btc = nextClosedTrade.getQuantity() * nextClosedTrade.getAveragePrice();
+            Long timestamp = nextClosedTrade.getTimestamp();
             while (iterator.hasNext()) {
-                nextTrade = iterator.next();
-                if (!nextTrade.getOrderType().equals(orderType)) {
-                    combinedTradesForMarket.add(new Trade(trades.getKey(), qty, btc / qty, orderType, timestamp));
-                    orderType = nextTrade.getOrderType();
-                    qty = nextTrade.getQuantity();
-                    btc = nextTrade.getQuantity() * nextTrade.getAveragePrice();
-                    timestamp = nextTrade.getTimestamp();
+                nextClosedTrade = iterator.next();
+                if (!nextClosedTrade.getOrderType().equals(orderType)) {
+                    combinedTradesForMarket.add(new ClosedTrade(trades.getKey(), qty, btc / qty, orderType, timestamp));
+                    orderType = nextClosedTrade.getOrderType();
+                    qty = nextClosedTrade.getQuantity();
+                    btc = nextClosedTrade.getQuantity() * nextClosedTrade.getAveragePrice();
+                    timestamp = nextClosedTrade.getTimestamp();
                 } else {
-                    qty += nextTrade.getQuantity();
-                    btc += nextTrade.getQuantity() * nextTrade.getAveragePrice();
-                    timestamp = nextTrade.getTimestamp();
+                    qty += nextClosedTrade.getQuantity();
+                    btc += nextClosedTrade.getQuantity() * nextClosedTrade.getAveragePrice();
+                    timestamp = nextClosedTrade.getTimestamp();
                 }
             }
-            combinedTradesForMarket.add(new Trade(trades.getKey(), qty, btc / qty, orderType, timestamp));
-            combinedTrades.addAll(combinedTradesForMarket);
+            combinedTradesForMarket.add(new ClosedTrade(trades.getKey(), qty, btc / qty, orderType, timestamp));
+            combinedClosedTrades.addAll(combinedTradesForMarket);
         }
 
-        return combinedTrades.stream().sorted(Comparator.comparing(Trade::getTimestamp).reversed()).collect(Collectors.toList());
+        return combinedClosedTrades.stream().sorted(Comparator.comparing(ClosedTrade::getTimestamp).reversed()).collect(Collectors.toList());
     }
 
-    public List<Trade> getOpenPositions() {
-        Map<String, Trade> lastTradeForMarket = new HashMap<>();
-        for (Trade trade : getTrades()) {
-            if (!lastTradeForMarket.containsKey(trade.getMarketName()))
-                lastTradeForMarket.put(trade.getMarketName(), trade);
+    public List<ClosedTrade> getOpenPositions() {
+        Map<String, ClosedTrade> lastTradeForMarket = new HashMap<>();
+        for (ClosedTrade closedTrade : getTrades()) {
+            if (!lastTradeForMarket.containsKey(closedTrade.getMarketName()))
+                lastTradeForMarket.put(closedTrade.getMarketName(), closedTrade);
         }
         return lastTradeForMarket.values().stream().filter(t -> t.getOrderType().equals(OrderType.BUY)).collect(Collectors.toList());
     }

@@ -31,7 +31,7 @@ public class WebSocketService {
     @PostConstruct
     private void init() throws IOException {
         this.mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//        subScribeToMarketTickers();
+        subScribeToMarketTickers();
     }
 
     private void subScribeToMarketTickers() throws IOException {

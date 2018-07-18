@@ -30,7 +30,7 @@ public class MovingAverageBotApplicationTests {
 	private static final Logger log = LoggerFactory.getLogger(MovingAverageBotApplicationTests.class);
 	private static final Double BUY_PERC_TRIGGER = 0.05;
 	private static final Double AVERAGE_DOWN_PERC_TRIGGER = 0.10;
-	private static final Double SELL_PERC_TRIGGER = 0.025;
+	private static final Double SELL_PERC_TRIGGER = 0.0;
 	private static final Integer EMA_PERIOD = 100;
 	private static final Integer LONG_EMA_PERIOD = 200;
 
@@ -150,18 +150,18 @@ public class MovingAverageBotApplicationTests {
 					tradeList.add(Pair.of(startTimeStamp, candlestick.getCloseTime()));
 					averagedDown = false;
 				}
-				if (!averagedDown && low <= SMA * (1.0 - AVERAGE_DOWN_PERC_TRIGGER)) {
-					log.info("[" + market + "] AVERAGE DOWN @ price " + String.format("%.8f", SMA * (1 - AVERAGE_DOWN_PERC_TRIGGER)) + " -- " + dateTime);
-					Double candleVolume = 0.0125;
+//				if (!averagedDown && low <= SMA * (1.0 - AVERAGE_DOWN_PERC_TRIGGER)) {
+//					log.info("[" + market + "] AVERAGE DOWN @ price " + String.format("%.8f", SMA * (1 - AVERAGE_DOWN_PERC_TRIGGER)) + " -- " + dateTime);
+//					Double candleVolume = 0.0125;
 //					Double candleVolume = Double.valueOf(candlestick.getQuoteAssetVolume()) / 50;
-					quantityAvailable += candleVolume / (SMA * (1 - AVERAGE_DOWN_PERC_TRIGGER)) * (1 - Constants.TRANSACTION_FEE);
-					previousBaseValue = base;
-					lastBuyPrice = SMA * (1 - AVERAGE_DOWN_PERC_TRIGGER);
-					base -= candleVolume;
-					candlesSinceBuy = 1;
-					startTimeStamp = candlestick.getCloseTime();
-					averagedDown = true;
-				}
+//					quantityAvailable += candleVolume / (SMA * (1 - AVERAGE_DOWN_PERC_TRIGGER)) * (1 - Constants.TRANSACTION_FEE);
+//					previousBaseValue = base;
+//					lastBuyPrice = SMA * (1 - AVERAGE_DOWN_PERC_TRIGGER);
+//					base -= candleVolume;
+//					candlesSinceBuy = 1;
+//					startTimeStamp = candlestick.getCloseTime();
+//					averagedDown = true;
+//				}
 			} else {
 				if (low <= SMA * (1.0 - BUY_PERC_TRIGGER)) {
 //					if (candleDate.after(endDate))
@@ -169,7 +169,7 @@ public class MovingAverageBotApplicationTests {
 
 					// buy
 					log.info("[" + market + "] BUY @ price " + String.format("%.8f", SMA * (1 - BUY_PERC_TRIGGER)) + " -- " + dateTime);
-					Double candleVolume = 0.025;
+					Double candleVolume = 0.05;
 //					Double candleVolume = Double.valueOf(candlestick.getQuoteAssetVolume()) / 50;
 					quantityAvailable = candleVolume / (SMA * (1 - BUY_PERC_TRIGGER)) * (1 - Constants.TRANSACTION_FEE);
 					previousBaseValue = base;

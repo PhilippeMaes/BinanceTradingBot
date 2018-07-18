@@ -7,7 +7,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "CLOSED_TRADE")
-public class Trade {
+public class ClosedTrade {
 
     @Id
     @GeneratedValue
@@ -19,14 +19,14 @@ public class Trade {
     private OrderType orderType;
     private Long timestamp;
 
-    private Trade() {
+    private ClosedTrade() {
     }
 
-    public Trade(String marketName, Double quantity, Double averagePrice, OrderType orderType) {
+    public ClosedTrade(String marketName, Double quantity, Double averagePrice, OrderType orderType) {
         this(marketName, quantity, averagePrice, orderType, System.currentTimeMillis());
     }
 
-    public Trade(String marketName, Double quantity, Double averagePrice, OrderType orderType, Long timestamp) {
+    public ClosedTrade(String marketName, Double quantity, Double averagePrice, OrderType orderType, Long timestamp) {
         this.marketName = marketName;
         this.quantity = quantity;
         this.averagePrice = averagePrice;

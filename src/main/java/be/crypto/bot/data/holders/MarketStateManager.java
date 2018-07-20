@@ -46,7 +46,6 @@ public class MarketStateManager {
         this.holders = new HashMap<>();
         this.marketStates = new HashMap<>();
         this.marketTickers = new HashMap<>();
-        this.averageGap = 0.0;
     }
 
     public void collectMarketStates() {

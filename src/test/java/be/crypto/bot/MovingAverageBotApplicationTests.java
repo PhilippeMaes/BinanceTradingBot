@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class MovingAverageBotApplicationTests {
 
 	private static final Logger log = LoggerFactory.getLogger(MovingAverageBotApplicationTests.class);
-	private static final Double BUY_PERC_TRIGGER = 0.05;
+	private static final Double BUY_PERC_TRIGGER = 0.075;
 	private static final Double AVERAGE_DOWN_PERC_TRIGGER = 0.10;
 	private static final Double SELL_PERC_TRIGGER = 0.0;
 	private static final Integer EMA_PERIOD = 100;

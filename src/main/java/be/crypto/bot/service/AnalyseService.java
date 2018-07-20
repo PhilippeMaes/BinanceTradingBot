@@ -26,13 +26,13 @@ public class AnalyseService {
     private TradeService tradeService;
 
     public void checkTicker(MarketState marketState, MarketTicker marketTicker, Double averageGap) {
-        if (Arrays.asList(Constants.BLACK_LIST).contains(marketTicker.getSymbol()))
+        if (Arrays.asList(Constants.BLACK_LIST).contains(marketTicker.getSymbol()) || averageGap == null)
             return;
 
         // get variables
         String market = marketTicker.getSymbol();
         Double bid = Double.valueOf(marketTicker.getBid());
-        Double trigger = marketState.getSMA() * (1 - configHolder.getBuyPercentageTrigger());
+        Double trigger = marketState.getSMA() * averageGap * (1 - configHolder.getBuyPercentageTrigger());
 
         // analyse
         if (bid <= trigger)

@@ -2,6 +2,7 @@ package be.crypto.bot.service;
 
 import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.ConfigHolder;
+import be.crypto.bot.data.holders.MarketStateManager;
 import be.crypto.bot.domain.MarketState;
 import be.crypto.bot.domain.MarketTicker;
 import org.slf4j.Logger;
@@ -25,14 +26,17 @@ public class AnalyseService {
     @Autowired
     private TradeService tradeService;
 
-    public void checkTicker(MarketState marketState, MarketTicker marketTicker, Double averageGap) {
-        if (Arrays.asList(Constants.BLACK_LIST).contains(marketTicker.getSymbol()) || averageGap == null)
+    @Autowired
+    private MarketStateManager marketStateManager;
+
+    public void checkTicker(MarketState marketState, MarketTicker marketTicker) {
+        if (Arrays.asList(Constants.BLACK_LIST).contains(marketTicker.getSymbol()) || marketStateManager.getAverageGap() == null)
             return;
 
         // get variables
         String market = marketTicker.getSymbol();
         Double bid = Double.valueOf(marketTicker.getBid());
-        Double trigger = marketState.getSMA() * averageGap * (1 - configHolder.getBuyPercentageTrigger());
+        Double trigger = marketState.getSMA() * (marketStateManager.getAverageGap() - configHolder.getBuyPercentageTrigger());
 
         // analyse
         if (bid <= trigger)

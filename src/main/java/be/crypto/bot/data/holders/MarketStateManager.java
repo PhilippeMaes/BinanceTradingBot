@@ -62,6 +62,15 @@ public class MarketStateManager {
             marketStates.put(holder.getKey(), marketState);
         }
         averageGap = averageGapList.stream().mapToDouble(Double::doubleValue).sum() / averageGapList.size();
+        log.info("Average market gap: " + averageGap);
+    }
+
+    public Optional<MarketTicker> getTicker(String market) {
+        return marketTickers.containsKey(market) ? Optional.of(marketTickers.get(market)) : Optional.empty();
+    }
+
+    public Double getAverageGap() {
+        return averageGap;
     }
 
     public void updateTicker(String market, MarketTicker marketTicker) {
@@ -76,7 +85,7 @@ public class MarketStateManager {
         marketTickers.put(market, marketTicker);
 
         if (marketStates.containsKey(market))
-            analyseService.checkTicker(marketStates.get(market), marketTicker, averageGap);
+            analyseService.checkTicker(marketStates.get(market), marketTicker);
     }
 
     public Optional<MarketState> getMarketState(String market) {

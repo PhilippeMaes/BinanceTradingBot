@@ -1,5 +1,6 @@
 package be.crypto.bot.rest;
 
+import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.BalanceSnapshotRepository;
 import be.crypto.bot.data.ClosedTradeService;
 import be.crypto.bot.data.ConfigHolder;
@@ -8,13 +9,11 @@ import be.crypto.bot.domain.BalanceSnapshot;
 import be.crypto.bot.domain.DTO.ConfigDTO;
 import be.crypto.bot.domain.DTO.OpenPositionDTO;
 import be.crypto.bot.service.exchange.WebService;
+import com.binance.api.client.domain.general.SymbolInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -53,7 +52,9 @@ public class RestService {
 
     @RequestMapping("/openTrades")
     public ResponseEntity<?> getOpenTrades() {
-        List<OpenPositionDTO> openPositionDTOs = closedTradeService.getOpenPositions().stream().map(t -> Factory.createOpenPositionDTO(t, Double.valueOf(webService.getTicker(t.getMarketName()).getLastPrice()))).collect(Collectors.toList());
+        List<OpenPositionDTO> openPositionDTOs = closedTradeService.getOpenPositions().stream()
+                .filter(c -> c.getQuantity() > Double.valueOf(webService.getSymbolInfo(Constants.BASE, c.getMarketName()).getFilters().get(1).getMinQty()))
+                .map(t -> Factory.createOpenPositionDTO(t, Double.valueOf(webService.getTicker(t.getMarketName()).getLastPrice()))).collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(openPositionDTOs);
     }
 
@@ -82,6 +83,26 @@ public class RestService {
         configHolder.setBuyPercentageTrigger(configDTO.getBuyPercentageTrigger());
         configHolder.setSellPercentageTrigger(configDTO.getSellPercentageTrigger());
         configHolder.setMaxOrderSize(configDTO.getMaxOrderSize());
+
+        return ResponseEntity.status(HttpStatus.OK).body("Success");
+    }
+
+    @RequestMapping(value = "/marketSell", method = RequestMethod.POST)
+    public ResponseEntity<?> marketSell(@RequestParam("market") String market) {
+        if (market == null) {
+            throw new IllegalArgumentException("Market can't be null");
+        }
+
+        // get quantity
+        Double quantity = balanceHolder.getBalance(market);
+
+        // get symbol info
+        SymbolInfo symbolInfo = webService.getSymbolInfo(Constants.BASE, market);
+        if (quantity < Double.valueOf(symbolInfo.getFilters().get(1).getMinQty())) {
+            throw new IllegalArgumentException("Quantity too low");
+        }
+
+        webService.placeMarketSellOrder(Constants.BASE, market, quantity);
 
         return ResponseEntity.status(HttpStatus.OK).body("Success");
     }

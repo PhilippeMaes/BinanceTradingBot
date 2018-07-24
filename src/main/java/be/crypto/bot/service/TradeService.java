@@ -119,7 +119,7 @@ public class TradeService {
                     // place sell order
                     Optional<MarketState> marketState = stateManager.getMarketState(marketName);
                     if (marketState.isPresent())
-                        placeSell(marketName, marketState.get().getSMA() * (1 + configHolder.getSellPercentageTrigger()), true);
+                        placeSell(marketName, marketState.get().getSMA() * (stateManager.getAverageGap() + configHolder.getSellPercentageTrigger()), true);
                 } else {
                     // release coin
                     tradesInProgress.remove(marketName);
@@ -163,7 +163,7 @@ public class TradeService {
                     // move order
                     Optional<MarketState> marketState = stateManager.getMarketState(market);
                     if (marketState.isPresent())
-                        placeSell(market, marketState.get().getSMA() * (1 + configHolder.getSellPercentageTrigger()), false);
+                        placeSell(market, marketState.get().getSMA() * (stateManager.getAverageGap() + configHolder.getSellPercentageTrigger()), false);
                 } else {
                     // release coin
                     tradesInProgress.remove(market);

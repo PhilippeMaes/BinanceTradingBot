@@ -5,7 +5,6 @@ import be.crypto.bot.data.ClosedTradeService;
 import be.crypto.bot.domain.ClosedTrade;
 import be.crypto.bot.domain.OrderType;
 import be.crypto.bot.service.PushOverService;
-import be.crypto.bot.service.exchange.WebService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,7 @@ public class BalanceHolder {
     private PushOverService pushOverService;
 
     @Autowired
-    private WebService webService;
+    private MarketStateManager marketStateManager;
 
     @PostConstruct
     private void init() {
@@ -99,7 +98,8 @@ public class BalanceHolder {
         Double totalBaseBalance = baseBalance;
         totalBaseBalance += balanceMap.entrySet()
                 .stream()
-                .mapToDouble(b -> Double.valueOf(webService.getTicker(b.getKey()).getLastPrice()) * b.getValue())
+                .filter(b -> marketStateManager.getTicker(b.getKey()).isPresent())
+                .mapToDouble(b -> Double.valueOf(marketStateManager.getTicker(b.getKey()).get().getClose()) * b.getValue())
                 .sum();
         return totalBaseBalance;
     }

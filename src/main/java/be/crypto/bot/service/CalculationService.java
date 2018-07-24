@@ -70,4 +70,24 @@ public class CalculationService {
 
         return (currentRSI - lowestRSI) / (highestRSI - lowestRSI);
     }
+
+    public double getLowerBollingerBand(Double EMA, List<Double> priceHistory) {
+        return EMA - 2 * getStandardDeviation(EMA, priceHistory);
+    }
+
+    public double getUpperBollingerBand(Double EMA, List<Double> priceHistory) {
+        return EMA + 2 * getStandardDeviation(EMA, priceHistory);
+    }
+
+    public double getStandardDeviation(Double EMA, List<Double> priceHistory) {
+        double deviationSum = 0.0;
+        for (Double price : priceHistory) {
+            double deviation = price - EMA;
+            double squaredDeviation = deviation * deviation;
+            deviationSum += squaredDeviation;
+        }
+        double deviatianAverage = deviationSum / priceHistory.size();
+        double root = Math.sqrt(deviatianAverage);
+        return root;
+    }
 }

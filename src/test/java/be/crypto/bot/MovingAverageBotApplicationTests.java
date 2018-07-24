@@ -31,8 +31,9 @@ public class MovingAverageBotApplicationTests {
 	private static final Double BUY_PERC_TRIGGER = 0.075;
 	private static final Double AVERAGE_DOWN_PERC_TRIGGER = 0.10;
 	private static final Double SELL_PERC_TRIGGER = 0.0;
-	private static final Integer EMA_PERIOD = 100;
-	private static final Integer LONG_EMA_PERIOD = 200;
+	private static final Integer EMA_PERIOD = 20;
+	private static final Integer SMA_PERIOD = 100;
+	private static final Integer LONG_SMA_PERIOD = 200;
 
 	private RSIResult WildersRSI = null;
 	private List<Double> RSIHolder;
@@ -48,6 +49,8 @@ public class MovingAverageBotApplicationTests {
 	private Double EMA26 = null;
 	private Double EMA9 = null;
 	private Double MACD = null;
+	private Double upperBollinger = null;
+	private Double lowerBollinger = null;
 
 	private Integer trades = 0;
 	private Integer badTrades = 0;
@@ -212,6 +215,8 @@ public class MovingAverageBotApplicationTests {
 			if (closeHolder.size() >= EMA_PERIOD) {
 				double previousEMA = EMA != null ? EMA : closeHolder.subList(closeHolder.size() - EMA_PERIOD, closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / EMA_PERIOD;
 				EMA = calculationService.getEMA(EMA_PERIOD, previousEMA, close);
+				lowerBollinger = calculationService.getLowerBollingerBand(EMA, closeHolder.subList(closeHolder.size() - EMA_PERIOD, closeHolder.size()));
+				upperBollinger = calculationService.getUpperBollingerBand(EMA, closeHolder.subList(closeHolder.size() - EMA_PERIOD, closeHolder.size()));
 			}
 
 			if (closeHolder.size() >= Constants.RSI_PERIOD) {
@@ -250,11 +255,11 @@ public class MovingAverageBotApplicationTests {
 		closeHolder.add(close);
 		previousClose = close;
 
-		if (closeHolder.size() >= EMA_PERIOD) {
-			SMA = closeHolder.subList(closeHolder.size() - EMA_PERIOD, closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / EMA_PERIOD;
+		if (closeHolder.size() >= SMA_PERIOD) {
+			SMA = closeHolder.subList(closeHolder.size() - SMA_PERIOD, closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / SMA_PERIOD;
 		}
-		if (closeHolder.size() >= LONG_EMA_PERIOD) {
-			LongSMA = closeHolder.subList(closeHolder.size() - LONG_EMA_PERIOD, closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / LONG_EMA_PERIOD;
+		if (closeHolder.size() >= LONG_SMA_PERIOD) {
+			LongSMA = closeHolder.subList(closeHolder.size() - LONG_SMA_PERIOD, closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / LONG_SMA_PERIOD;
 		}
 
 		return EMA != null && WildersRSI != null && StochRSI != null ? Optional.of(new MarketState(SMA, EMA, WildersRSI, StochRSI)) : Optional.empty();

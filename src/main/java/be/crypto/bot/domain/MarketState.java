@@ -9,12 +9,16 @@ public class MarketState {
     private Double EMA;
     private RSIResult RSI;
     private Double StochRSI;
+    private Double lowerBollinger;
+    private Double upperBollinger;
 
-    public MarketState(Double SMA, Double EMA, RSIResult RSI, Double stochRSI) {
+    public MarketState(Double SMA, Double EMA, RSIResult RSI, Double stochRSI, Double lowerBollinger, Double upperBollinger) {
         this.SMA = SMA;
         this.EMA = EMA;
         this.RSI = RSI;
-        StochRSI = stochRSI;
+        this.StochRSI = stochRSI;
+        this.lowerBollinger = lowerBollinger;
+        this.upperBollinger = upperBollinger;
     }
 
     public Double getSMA() {
@@ -31,5 +35,13 @@ public class MarketState {
 
     public Double getStochRSI() {
         return StochRSI;
+    }
+
+    public Double getLowerBollinger() {
+        return lowerBollinger;
+    }
+
+    public Double getUpperBollinger() {
+        return upperBollinger;
     }
 }

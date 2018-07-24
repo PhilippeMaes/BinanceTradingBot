@@ -23,6 +23,8 @@ public class MarketStateHolder {
     private Double SMA;
     private Double StochRSI;
     private RSIResult WildersRSI;
+    private Double lowerBollinger;
+    private Double upperBollinger;
     private List<Double> RSIHolder;
 
     public MarketStateHolder(List<Double> closes, CalculationService calculationService, ConfigHolder configHolder) {
@@ -39,6 +41,8 @@ public class MarketStateHolder {
         closeHolder.add(close);
         closeHolder = closeHolder.subList(closeHolder.size() - configHolder.getSMALength(), closeHolder.size());
         SMA = closeHolder.stream().mapToDouble(Double::doubleValue).sum() / configHolder.getSMALength();
+        lowerBollinger = calculationService.getLowerBollingerBand(SMA, closeHolder.subList(closeHolder.size() - Constants.BOLLINGER_PERIOD, closeHolder.size()));
+        upperBollinger = calculationService.getUpperBollingerBand(SMA, closeHolder.subList(closeHolder.size() - Constants.BOLLINGER_PERIOD, closeHolder.size()));
 
         EMA = calculationService.getEMA(configHolder.getSMALength(), EMA, close);
         double gain = close - previousClose;
@@ -48,7 +52,7 @@ public class MarketStateHolder {
         StochRSI = calculationService.getStochRSI(RSIHolder.subList(RSIHolder.size() - Constants.RSI_PERIOD, RSIHolder.size()));
         previousClose = close;
 
-        return new MarketState(SMA, EMA, WildersRSI, StochRSI);
+        return new MarketState(SMA, EMA, WildersRSI, StochRSI, lowerBollinger, upperBollinger);
     }
 
     public void calculateInitialMarketState() {

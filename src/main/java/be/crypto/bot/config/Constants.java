@@ -17,6 +17,7 @@ public class Constants {
     public static final Double BUY_PERC_TRIGGER = 0.075;
     public static final Double SELL_PERC_TRIGGER = 0.0;
     public static final Integer RSI_PERIOD = 14;
+    public static final Integer BOLLINGER_PERIOD = 20;
 
     public static final String BASE = "BTC";
     public static final Double MAX_INITIAL_BASE = 0.10;

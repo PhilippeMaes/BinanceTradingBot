@@ -208,6 +208,8 @@ public class MovingAverageBotApplicationTests {
 		this.EMA9 = null;
 		this.StochRSI = null;
 		this.WildersRSI = null;
+		this.lowerBollinger = null;
+		this.upperBollinger = null;
 	}
 
 	public Optional<MarketState> getMarketState(Double close) {
@@ -262,7 +264,7 @@ public class MovingAverageBotApplicationTests {
 			LongSMA = closeHolder.subList(closeHolder.size() - LONG_SMA_PERIOD, closeHolder.size()).stream().mapToDouble(Double::doubleValue).sum() / LONG_SMA_PERIOD;
 		}
 
-		return EMA != null && WildersRSI != null && StochRSI != null ? Optional.of(new MarketState(SMA, EMA, WildersRSI, StochRSI)) : Optional.empty();
+		return EMA != null && WildersRSI != null && StochRSI != null ? Optional.of(new MarketState(SMA, EMA, WildersRSI, StochRSI, lowerBollinger, upperBollinger)) : Optional.empty();
 	}
 }
 

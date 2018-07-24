@@ -29,6 +29,7 @@ public class MarketStateManager {
     private Map<String, MarketState> marketStates;
     private Map<String, MarketTicker> marketTickers;
     private Double averageGap;
+    private Double averageRSI;
 
     @Autowired
     private ConfigHolder configHolder;
@@ -50,6 +51,8 @@ public class MarketStateManager {
 
     public void collectMarketStates() {
         List<Double> averageGapList = new ArrayList<>();
+        List<Double> averageRSIList = new ArrayList<>();
+
         for (Map.Entry<String, MarketStateHolder> holder : holders.entrySet()) {
             if (!marketTickers.containsKey(holder.getKey()))
                 continue;
@@ -58,11 +61,16 @@ public class MarketStateManager {
             MarketState marketState = holder.getValue().getMarketState(close);
 
             averageGapList.add(close / marketState.getEMA());
+            averageRSIList.add(marketState.getRSI());
 
             marketStates.put(holder.getKey(), marketState);
         }
+
         averageGap = averageGapList.stream().mapToDouble(Double::doubleValue).sum() / averageGapList.size();
+        averageRSI = averageRSIList.stream().mapToDouble(Double::doubleValue).sum() / averageRSIList.size();
+
         log.info("Average market gap: " + averageGap);
+        log.info("Average market RSI: " + averageRSI);
     }
 
     public Optional<MarketTicker> getTicker(String market) {
@@ -71,6 +79,10 @@ public class MarketStateManager {
 
     public Double getAverageGap() {
         return averageGap;
+    }
+
+    public Double getAverageRSI() {
+        return averageRSI;
     }
 
     public void updateTicker(String market, MarketTicker marketTicker) {

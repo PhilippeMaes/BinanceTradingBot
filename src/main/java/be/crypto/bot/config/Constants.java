@@ -14,14 +14,14 @@ public class Constants {
     public static final String PUSHOVER_DEVICE_NAME = "GS8";
 
     public static final Integer EMA_PERIOD = 100;
-    public static final Double BUY_PERC_TRIGGER = 0.075;
+    public static final Double BUY_PERC_TRIGGER = 0.05;
     public static final Double SELL_PERC_TRIGGER = 0.0;
     public static final Integer RSI_PERIOD = 14;
     public static final Integer BOLLINGER_PERIOD = 20;
 
     public static final String BASE = "BTC";
-    public static final Double MAX_INITIAL_BASE = 0.10;
-    public static final Double MAX_ORDER_SIZE = 0.025;
+    public static final Double MAX_INITIAL_BASE = 0.03;
+    public static final Double MAX_ORDER_SIZE = 0.01;
 
-    public static final String[] BLACK_LIST = { "BCN", "NPXS", "TUSD" };
+    public static final String[] BLACK_LIST = { "BCN", "NPXS", "TUSD", "HOT", "DENT" };
 }

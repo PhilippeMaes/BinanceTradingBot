@@ -91,9 +91,9 @@ public class TradeService {
             return;
 
         // placing immediate or cancel limit order
-        log.info("[" + marketName + "] Placing sell order for " + quantity + " @ price " + String.format("%.8f", limit));
+        if (initial) log.info("[" + marketName + "] Placing sell order for " + quantity + " @ price " + String.format("%.8f", limit));
         OpenOrder openOrder = webService.placeLimitSellOrder(Constants.BASE, marketName, quantity, limit);
-        log.info("[" + marketName + "] Placed sell order for " + quantity + " @ price " + String.format("%.8f", limit));
+        if (initial) log.info("[" + marketName + "] Placed sell order for " + quantity + " @ price " + String.format("%.8f", limit));
 
         // remember
         orderHolder.addTrade(marketName, openOrder, OrderType.SELL);
@@ -104,7 +104,7 @@ public class TradeService {
     public void checkBuyOrders() {
         synchronized (tradesInProgress) {
             Map<String, OpenOrder> openBuyOrders = new HashMap<>(orderHolder.getOpenBuyTrades());
-            log.info("Checking [" + openBuyOrders.size() + "] buy orders");
+            log.debug("Checking [" + openBuyOrders.size() + "] buy orders");
             for (Map.Entry<String, OpenOrder> openBuyOrder : openBuyOrders.entrySet()) {
                 String marketName = openBuyOrder.getKey();
                 OpenOrder openOrder = openBuyOrder.getValue();
@@ -136,7 +136,7 @@ public class TradeService {
     public void checkSellOrders() {
         synchronized (tradesInProgress) {
             Map<String, OpenOrder> openSellOrders = new HashMap<>(orderHolder.getOpenSellTrades());
-            log.info("Moving [" + openSellOrders.size() + "] sell orders");
+            log.debug("Moving [" + openSellOrders.size() + "] sell orders");
             for (Map.Entry<String, OpenOrder> openSellOrder : openSellOrders.entrySet()) {
                 // get values
                 String market = openSellOrder.getKey();

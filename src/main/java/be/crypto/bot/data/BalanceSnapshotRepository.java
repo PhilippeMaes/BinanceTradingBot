@@ -14,5 +14,5 @@ public interface BalanceSnapshotRepository extends JpaRepository<BalanceSnapshot
 
     BalanceSnapshot findFirstByOrderByTimestampDesc();
 
-    List<BalanceSnapshot> findAllByOrderByTimestampDesc();
+    List<BalanceSnapshot> findAllByOrderByTimestampAsc();
 }

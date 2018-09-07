@@ -30,7 +30,11 @@ public class AnalyseService {
     private MarketStateManager marketStateManager;
 
     public void checkTicker(MarketState marketState, MarketTicker marketTicker) {
-        if (Arrays.asList(Constants.BLACK_LIST).contains(marketTicker.getSymbol()) || marketStateManager.getAverageGap() == null)
+        if (Arrays.asList(Constants.BLACK_LIST).contains(marketTicker.getSymbol()) || marketStateManager.getAverageGap() == null || marketStateManager.getAverageRSI() == null)
+            return;
+
+        // we don't want to buy in a market wide drop
+        if (marketStateManager.getAverageRSI() < 45.0)
             return;
 
         // get variables

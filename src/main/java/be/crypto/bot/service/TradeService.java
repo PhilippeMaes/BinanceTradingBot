@@ -13,6 +13,7 @@ import com.binance.api.client.domain.OrderStatus;
 import com.binance.api.client.domain.TimeInForce;
 import com.binance.api.client.domain.account.Order;
 import com.binance.api.client.domain.general.SymbolInfo;
+import com.binance.api.client.exception.BinanceApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,7 +111,13 @@ public class TradeService {
                 OpenOrder openOrder = openBuyOrder.getValue();
 
                 // update balances
-                Order order = webService.getOrder(Constants.BASE, marketName, openOrder.getOrderId());
+                Order order;
+                try {
+                    order = webService.getOrder(Constants.BASE, marketName, openOrder.getOrderId());
+                } catch (BinanceApiException ex) {
+                    log.error("Error cancelling sell order for " + marketName, ex);
+                    continue;
+                }
                 Double executedQty = Double.valueOf(order.getExecutedQty());
                 Double executedRate = Double.valueOf(order.getPrice());
                 if (executedQty > 0.0) {
@@ -150,7 +157,12 @@ public class TradeService {
 
                 // if not filled -> move order
                 if (!order.getStatus().equals(OrderStatus.FILLED)) {
-                    webService.cancelOrder(Constants.BASE, market, orderID);
+                    try {
+                        webService.cancelOrder(Constants.BASE, market, orderID);
+                    } catch (BinanceApiException ex) {
+                        log.error("Error cancelling sell order for " + market, ex);
+                        continue;
+                    }
                     orderHolder.removeTrade(market, OrderType.SELL);
 
                     // wait for Binance to process order

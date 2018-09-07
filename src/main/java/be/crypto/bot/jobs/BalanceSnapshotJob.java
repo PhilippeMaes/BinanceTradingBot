@@ -19,7 +19,7 @@ public class BalanceSnapshotJob {
     @Autowired
     private BalanceSnapshotRepository repository;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0/5 * * * ?")
     private void takeSnapshot() {
         repository.save(new BalanceSnapshot(balanceHolder.getTotalBaseBalance()));
     }

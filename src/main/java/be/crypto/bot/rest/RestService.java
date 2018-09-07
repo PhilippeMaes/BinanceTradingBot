@@ -5,9 +5,15 @@ import be.crypto.bot.data.BalanceSnapshotRepository;
 import be.crypto.bot.data.ClosedTradeService;
 import be.crypto.bot.data.ConfigHolder;
 import be.crypto.bot.data.holders.BalanceHolder;
+import be.crypto.bot.data.holders.MarketStateHolder;
+import be.crypto.bot.data.holders.MarketStateManager;
+import be.crypto.bot.data.holders.OrderHolder;
 import be.crypto.bot.domain.BalanceSnapshot;
 import be.crypto.bot.domain.DTO.ConfigDTO;
 import be.crypto.bot.domain.DTO.OpenPositionDTO;
+import be.crypto.bot.domain.OpenOrder;
+import be.crypto.bot.domain.OrderType;
+import be.crypto.bot.domain.TimeFrame;
 import be.crypto.bot.service.exchange.WebService;
 import com.binance.api.client.domain.general.SymbolInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +30,8 @@ import java.util.stream.Collectors;
 @RestController
 public class RestService {
 
+    private static final Integer CHART_POINTS = 20;
+
     @Autowired
     private ClosedTradeService closedTradeService;
 
@@ -37,11 +45,18 @@ public class RestService {
     private ConfigHolder configHolder;
 
     @Autowired
+    private OrderHolder orderHolder;
+
+    @Autowired
+    private MarketStateManager marketStateManager;
+
+    @Autowired
     private BalanceSnapshotRepository balanceSnapshotRepository;
 
     @RequestMapping("/chartData")
-    public ResponseEntity<?> getChartData() {
-        List<BalanceSnapshot> balanceSnapshots = balanceSnapshotRepository.findAllByOrderByTimestampDesc();
+    public ResponseEntity<?> getChartData(@RequestParam("timeFrame") String timeFrame) {
+        List<BalanceSnapshot> balanceSnapshots = balanceSnapshotRepository.findAllByOrderByTimestampAsc();
+        balanceSnapshots = balanceSnapshots.subList(balanceSnapshots.size() - CHART_POINTS, balanceSnapshots.size());
         return ResponseEntity.status(HttpStatus.OK).body(Factory.fromBalances(balanceSnapshots));
     }
 
@@ -65,6 +80,10 @@ public class RestService {
 
     @RequestMapping("/balanceChange")
     public ResponseEntity<?> getBalanceChange() {
+        BalanceSnapshot latestBalanceSnapshot = balanceSnapshotRepository.findFirstByOrderByTimestampDesc();
+        if (latestBalanceSnapshot == null)
+            return ResponseEntity.status(HttpStatus.OK).body(0.0);
+
         Double change = balanceHolder.getTotalBaseBalance() / balanceSnapshotRepository.findFirstByOrderByTimestampDesc().getBalance();
         change = change.equals(Double.NaN) ? 0.0 : (change - 1.0) * 100.0;
         return ResponseEntity.status(HttpStatus.OK).body(change);
@@ -93,6 +112,11 @@ public class RestService {
             throw new IllegalArgumentException("Market can't be null");
         }
 
+        // cancel open order
+        OpenOrder openSellOrder = orderHolder.getTrade(market, OrderType.SELL);
+        if (openSellOrder != null)
+            webService.cancelOrder(Constants.BASE, market, openSellOrder.getOrderId());
+
         // get quantity
         Double quantity = balanceHolder.getBalance(market);
 
@@ -103,6 +127,7 @@ public class RestService {
         }
 
         webService.placeMarketSellOrder(Constants.BASE, market, quantity);
+        balanceHolder.sold(market, quantity, Double.valueOf(marketStateManager.getTicker(market).get().getBid()));
 
         return ResponseEntity.status(HttpStatus.OK).body("Success");
     }

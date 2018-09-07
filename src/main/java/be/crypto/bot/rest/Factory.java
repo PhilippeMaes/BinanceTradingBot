@@ -18,7 +18,8 @@ import java.util.stream.Collectors;
 public class Factory {
 
     public static BalanceDTO fromBalances(List<BalanceSnapshot> balances) {
-        List<String> dates = balances.stream().map(b -> b.getFormattedDate()).collect(Collectors.toList());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        List<String> dates = balances.stream().map(b -> simpleDateFormat.format(new Date(b.getTimestamp()))).collect(Collectors.toList());
         List<Double> values = balances.stream().map(b -> b.getBalance()).collect(Collectors.toList());
         return new BalanceDTO(dates, values);
     }

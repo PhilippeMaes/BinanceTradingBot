@@ -23,10 +23,6 @@ public class BalanceSnapshotService {
         return repository.findAll();
     }
 
-    public List<BalanceSnapshot> getBalanceSnapshotsDesc() {
-        return repository.findAllByOrderByTimestampDesc();
-    }
-
     public Double getLatestBalanceSnapshot() {
         BalanceSnapshot snapshot = repository.findFirstByOrderByTimestampDesc();
         return snapshot != null ? snapshot.getBalance() : 0.0;

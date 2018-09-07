@@ -20,8 +20,8 @@ public class Constants {
     public static final Integer BOLLINGER_PERIOD = 20;
 
     public static final String BASE = "BTC";
-    public static final Double MAX_INITIAL_BASE = 0.03;
-    public static final Double MAX_ORDER_SIZE = 0.01;
+    public static final Double MAX_INITIAL_BASE = 0.045;
+    public static final Double MAX_ORDER_SIZE = 0.015;
 
     public static final String[] BLACK_LIST = { "BCN", "NPXS", "TUSD", "HOT", "DENT" };
 }

@@ -4,6 +4,7 @@ import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.ConfigHolder;
 import be.crypto.bot.data.holders.BalanceHolder;
 import be.crypto.bot.data.holders.MarketStateManager;
+import be.crypto.bot.data.holders.OpenPositionHolder;
 import be.crypto.bot.data.holders.OrderHolder;
 import be.crypto.bot.domain.MarketState;
 import be.crypto.bot.domain.OpenOrder;
@@ -12,6 +13,7 @@ import be.crypto.bot.service.exchange.WebService;
 import com.binance.api.client.domain.OrderStatus;
 import com.binance.api.client.domain.TimeInForce;
 import com.binance.api.client.domain.account.Order;
+import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.domain.general.SymbolInfo;
 import com.binance.api.client.exception.BinanceApiException;
 import org.slf4j.Logger;
@@ -44,6 +46,9 @@ public class TradeService {
 
     @Autowired
     private BalanceHolder balanceHolder;
+
+    @Autowired
+    private OpenPositionHolder openPositionHolder;
 
     @Autowired
     private MarketStateManager stateManager;
@@ -81,6 +86,41 @@ public class TradeService {
         }
     }
 
+    public void averageDown(String marketName) {
+        // cancel if no open position for market
+        if (!openPositionHolder.getOpenPosition(marketName).isPresent())
+            return;
+
+        // only average down once
+        if (openPositionHolder.getOpenPosition(marketName).get().isAveragedDown())
+            return;
+
+        // buy with 1% max spread
+        Double limit = Double.valueOf(stateManager.getTicker(marketName).get().getAsk()) * 1.01;
+        Double quantity = Constants.AVERAGING_DOWN_BALANCE / limit;
+        OpenOrder openOrder = webService.placeLimitBuyOrder(Constants.BASE, marketName, quantity, limit, TimeInForce.IOC);
+
+        // wait for Binance to process order
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            log.error("Error waiting for Binance", e);
+        }
+
+        // check executed amount and price
+        Order order = webService.getOrder(Constants.BASE, marketName, openOrder.getOrderId());
+        Double executedQty = Double.valueOf(order.getExecutedQty());
+        Double executedRate = Double.valueOf(order.getPrice());
+
+        // update balances
+        if (executedQty > 0.0) {
+            balanceHolder.bought(marketName, executedQty, executedRate);
+
+            // remember we averaged down
+            openPositionHolder.getOpenPosition(marketName).get().setAveragedDown(true);
+        }
+    }
+
     public void placeSell(String marketName, Double limit, boolean initial) {
         // get quantity
         Double quantity = balanceHolder.getBalance(marketName);
@@ -110,7 +150,7 @@ public class TradeService {
                 String marketName = openBuyOrder.getKey();
                 OpenOrder openOrder = openBuyOrder.getValue();
 
-                // update balances
+                // get order status
                 Order order;
                 try {
                     order = webService.getOrder(Constants.BASE, marketName, openOrder.getOrderId());
@@ -120,8 +160,16 @@ public class TradeService {
                 }
                 Double executedQty = Double.valueOf(order.getExecutedQty());
                 Double executedRate = Double.valueOf(order.getPrice());
+
+                // cancel remaining order if not filled
+                if (!order.getStatus().equals(OrderStatus.FILLED))
+                    webService.cancelOrder(Constants.BASE, marketName, openOrder.getOrderId());
+                orderHolder.removeTrade(marketName, OrderType.BUY);
+
+                // update balances
                 if (executedQty > 0.0) {
                     balanceHolder.bought(marketName, executedQty, executedRate);
+                    openPositionHolder.addPosition(marketName, executedRate);
 
                     // place sell order
                     Optional<MarketState> marketState = stateManager.getMarketState(marketName);
@@ -131,11 +179,6 @@ public class TradeService {
                     // release coin
                     tradesInProgress.remove(marketName);
                 }
-
-                // cancel remaining order if not filled
-                if (!order.getStatus().equals(OrderStatus.FILLED))
-                    webService.cancelOrder(Constants.BASE, marketName, openOrder.getOrderId());
-                orderHolder.removeTrade(marketName, OrderType.BUY);
             }
         }
     }
@@ -150,7 +193,13 @@ public class TradeService {
                 Long orderID = openSellOrder.getValue().getOrderId();
 
                 // update balances
-                Order order = webService.getOrder(Constants.BASE, market, orderID);
+                Order order;
+                try {
+                    order = webService.getOrder(Constants.BASE, market, orderID);
+                } catch (BinanceApiException ex) {
+                    log.error("Error getting sell order for " + market, ex);
+                    continue;
+                }
                 Double executedQty = Double.valueOf(order.getExecutedQty());
                 if (executedQty > 0.0)
                     balanceHolder.sold(market, Double.valueOf(order.getExecutedQty()), Double.valueOf(order.getPrice()));
@@ -167,7 +216,7 @@ public class TradeService {
 
                     // wait for Binance to process order
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         log.error("Error waiting for Binance", e);
                     }
@@ -180,6 +229,7 @@ public class TradeService {
                     // release coin
                     tradesInProgress.remove(market);
                     orderHolder.removeTrade(market, OrderType.SELL);
+                    openPositionHolder.removePosition(market);
                 }
             }
         }

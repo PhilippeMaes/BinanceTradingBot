@@ -202,7 +202,7 @@ public class TradeService {
                 }
                 Double executedQty = Double.valueOf(order.getExecutedQty());
                 if (executedQty > 0.0)
-                    balanceHolder.sold(market, Double.valueOf(order.getExecutedQty()), Double.valueOf(order.getPrice()));
+                    balanceHolder.sold(market, executedQty, Double.valueOf(order.getPrice()));
 
                 // if not filled -> move order
                 if (!order.getStatus().equals(OrderStatus.FILLED)) {

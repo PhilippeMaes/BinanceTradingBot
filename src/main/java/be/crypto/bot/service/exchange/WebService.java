@@ -1,6 +1,7 @@
 package be.crypto.bot.service.exchange;
 
 import be.crypto.bot.config.Constants;
+import be.crypto.bot.domain.CustomLogger;
 import be.crypto.bot.domain.OpenOrder;
 import be.crypto.bot.domain.OrderType;
 import com.binance.api.client.BinanceApiClientFactory;
@@ -32,7 +33,7 @@ import static com.binance.api.client.domain.account.NewOrder.*;
 @Service
 public class WebService {
 
-    private static final Logger log = LoggerFactory.getLogger(WebService.class);
+    private static final CustomLogger log = new CustomLogger(WebService.class);
 
     private BinanceApiRestClient client;
     private Map<String, SymbolInfo> symbolInfo;

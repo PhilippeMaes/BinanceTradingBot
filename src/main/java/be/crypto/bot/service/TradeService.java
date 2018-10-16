@@ -6,6 +6,7 @@ import be.crypto.bot.data.holders.BalanceHolder;
 import be.crypto.bot.data.holders.MarketManager;
 import be.crypto.bot.data.holders.OpenPositionHolder;
 import be.crypto.bot.data.holders.OrderHolder;
+import be.crypto.bot.domain.CustomLogger;
 import be.crypto.bot.domain.MarketState;
 import be.crypto.bot.domain.OpenOrder;
 import be.crypto.bot.domain.OrderType;
@@ -29,7 +30,7 @@ import java.util.*;
 @Service
 public class TradeService {
 
-    private static final Logger log = LoggerFactory.getLogger(TradeService.class);
+    private static final CustomLogger log = new CustomLogger(TradeService.class);
 
     private Map<String, Long> initialSellMap;
     private Set<String> tradesInProgress;

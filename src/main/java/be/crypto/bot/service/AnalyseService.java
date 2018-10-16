@@ -4,6 +4,7 @@ import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.ConfigHolder;
 import be.crypto.bot.data.holders.MarketManager;
 import be.crypto.bot.data.holders.OpenPositionHolder;
+import be.crypto.bot.domain.CustomLogger;
 import be.crypto.bot.domain.MarketState;
 import be.crypto.bot.domain.MarketTicker;
 import be.crypto.bot.domain.OpenPosition;
@@ -25,7 +26,7 @@ import java.util.Optional;
 @Service
 public class AnalyseService {
 
-    private static final Logger log = LoggerFactory.getLogger(AnalyseService.class);
+    private static final CustomLogger log = new CustomLogger(AnalyseService.class);
 
     @Autowired
     private ConfigHolder configHolder;
@@ -56,23 +57,24 @@ public class AnalyseService {
         if (Double.valueOf(marketManager.getTicker(market).get().getClose()) < 0.00000100)
             return;
 
-        // we don't want to buy when market crashes too quick and with high volume, a.k.a. a big dump
-        Double averageVolumeFiveMin = Double.valueOf(marketManager.getTicker(market).get().getVolume()) / 288.0;
-        List<Candlestick> candleSticks = webService.getCandleSticks(Constants.BASE, market, CandlestickInterval.FIVE_MINUTES);
-        Candlestick latestClosedCandle = candleSticks.get(candleSticks.size() - 2);
-        Candlestick currentCandle = candleSticks.get(candleSticks.size() - 1);
-        if (Double.valueOf(latestClosedCandle.getVolume()) / averageVolumeFiveMin > 25.0 || Double.valueOf(currentCandle.getVolume()) / averageVolumeFiveMin > 25.0) {
-            log.info("[" + market + "] Not buying because market is dumping too hard");
-            return;
-        }
-
         // get variables
         Double bid = Double.valueOf(marketTicker.getBid());
         Double trigger = marketState.getSMA() * (marketManager.getAverageGap() - configHolder.getBuyPercentageTrigger());
 
         // analyse
-        if (bid <= trigger)
+        if (bid <= trigger) {
+            // we don't want to buy when market crashes too quick and with high volume, a.k.a. a big dump
+            Double averageVolumeFiveMin = Double.valueOf(marketManager.getTicker(market).get().getVolume()) / 288.0;
+            List<Candlestick> candleSticks = webService.getCandleSticks(Constants.BASE, market, CandlestickInterval.FIVE_MINUTES);
+            Candlestick latestClosedCandle = candleSticks.get(candleSticks.size() - 2);
+            Candlestick currentCandle = candleSticks.get(candleSticks.size() - 1);
+            if (Double.valueOf(latestClosedCandle.getVolume()) / averageVolumeFiveMin > 25.0 || Double.valueOf(currentCandle.getVolume()) / averageVolumeFiveMin > 25.0) {
+                log.info("[" + market + "] Not buying because market is dumping too hard");
+                return;
+            }
+
             tradeService.buy(market, trigger);
+        }
 
         // average down if needed
         Optional<OpenPosition> openPosition = openPositionHolder.getOpenPosition(market);

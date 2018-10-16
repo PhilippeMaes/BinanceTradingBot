@@ -2,6 +2,7 @@ package be.crypto.bot.service.websocket;
 
 import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.holders.MarketManager;
+import be.crypto.bot.domain.CustomLogger;
 import be.crypto.bot.domain.MarketTicker;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +21,7 @@ import java.io.IOException;
 @Service
 public class WebSocketService {
 
-    private static final Logger log = LoggerFactory.getLogger(WebSocketService.class);
+    private static final CustomLogger log = new CustomLogger(WebSocketService.class);
     private static final String BINANCE_SOCKET_URL = "wss://stream.binance.com:9443/ws/";
 
     private ObjectMapper mapper;

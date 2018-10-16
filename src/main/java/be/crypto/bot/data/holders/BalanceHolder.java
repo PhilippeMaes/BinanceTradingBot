@@ -3,6 +3,7 @@ package be.crypto.bot.data.holders;
 import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.ClosedTradeService;
 import be.crypto.bot.domain.ClosedTrade;
+import be.crypto.bot.domain.CustomLogger;
 import be.crypto.bot.domain.OrderType;
 import be.crypto.bot.service.PushOverService;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class BalanceHolder {
 
-    private static final Logger log = LoggerFactory.getLogger(BalanceHolder.class);
+    private static final CustomLogger log = new CustomLogger(BalanceHolder.class);
 
     private ConcurrentHashMap<String, Double> balanceMap;
     private Double baseBalance;

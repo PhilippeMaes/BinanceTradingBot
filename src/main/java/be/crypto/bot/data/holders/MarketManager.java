@@ -2,6 +2,7 @@ package be.crypto.bot.data.holders;
 
 import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.ConfigHolder;
+import be.crypto.bot.domain.CustomLogger;
 import be.crypto.bot.domain.MarketState;
 import be.crypto.bot.domain.MarketTicker;
 import be.crypto.bot.service.AnalyseService;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class MarketManager {
 
-    private static final Logger log = LoggerFactory.getLogger(MarketManager.class);
+    private static final CustomLogger log = new CustomLogger(MarketManager.class);
 
     private Map<String, MarketStateHolder> holders;
     private Map<String, MarketState> marketStates;

@@ -3,7 +3,7 @@ package be.crypto.bot.service;
 import be.crypto.bot.config.Constants;
 import be.crypto.bot.data.ConfigHolder;
 import be.crypto.bot.data.holders.BalanceHolder;
-import be.crypto.bot.data.holders.MarketStateManager;
+import be.crypto.bot.data.holders.MarketManager;
 import be.crypto.bot.data.holders.OpenPositionHolder;
 import be.crypto.bot.data.holders.OrderHolder;
 import be.crypto.bot.domain.MarketState;
@@ -13,7 +13,6 @@ import be.crypto.bot.service.exchange.WebService;
 import com.binance.api.client.domain.OrderStatus;
 import com.binance.api.client.domain.TimeInForce;
 import com.binance.api.client.domain.account.Order;
-import com.binance.api.client.domain.account.Trade;
 import com.binance.api.client.domain.general.SymbolInfo;
 import com.binance.api.client.exception.BinanceApiException;
 import org.slf4j.Logger;
@@ -51,7 +50,7 @@ public class TradeService {
     private OpenPositionHolder openPositionHolder;
 
     @Autowired
-    private MarketStateManager stateManager;
+    private MarketManager stateManager;
 
     @PostConstruct
     private void init() {

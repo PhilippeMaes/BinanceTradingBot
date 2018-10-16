@@ -33,7 +33,7 @@ public class BalanceHolder {
     private PushOverService pushOverService;
 
     @Autowired
-    private MarketStateManager marketStateManager;
+    private MarketManager marketManager;
 
     @PostConstruct
     private void init() {
@@ -98,8 +98,8 @@ public class BalanceHolder {
         Double totalBaseBalance = baseBalance;
         totalBaseBalance += balanceMap.entrySet()
                 .stream()
-                .filter(b -> marketStateManager.getTicker(b.getKey()).isPresent())
-                .mapToDouble(b -> Double.valueOf(marketStateManager.getTicker(b.getKey()).get().getClose()) * b.getValue())
+                .filter(b -> marketManager.getTicker(b.getKey()).isPresent())
+                .mapToDouble(b -> Double.valueOf(marketManager.getTicker(b.getKey()).get().getClose()) * b.getValue())
                 .sum();
         return totalBaseBalance;
     }

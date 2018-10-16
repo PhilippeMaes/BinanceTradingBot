@@ -26,6 +26,8 @@ public class MarketTicker {
     private String ask;
     @JsonProperty("A")
     private String askQty;
+    @JsonProperty("v")
+    private String volume;
 
     @JsonProperty("c")
     public String getClose() {
@@ -71,5 +73,10 @@ public class MarketTicker {
     @JsonProperty("A")
     public String getAskQty() {
         return askQty;
+    }
+
+    @JsonProperty("v")
+    public String getVolume() {
+        return volume;
     }
 }

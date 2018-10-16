@@ -36,6 +36,7 @@ public class WebService {
 
     private BinanceApiRestClient client;
     private Map<String, SymbolInfo> symbolInfo;
+    private Map<String, List<Candlestick>> candleStickCache;
 
     @PostConstruct
     private void init() {
@@ -43,6 +44,7 @@ public class WebService {
         client = factory.newRestClient();
 
         this.symbolInfo = new HashMap<>();
+        this.candleStickCache = new HashMap<>();
 
         client.getExchangeInfo().getSymbols()
                 .stream()
@@ -145,6 +147,14 @@ public class WebService {
     }
 
     public List<Candlestick> getCandleSticks(String base, String marketName, CandlestickInterval interval) {
-        return client.getCandlestickBars(marketName + base, interval);
+        if (candleStickCache.containsKey(marketName)) {
+            Candlestick latestCandle = candleStickCache.get(marketName).get(candleStickCache.get(marketName).size() - 1);
+            if (System.currentTimeMillis() - latestCandle.getOpenTime() < (5 * 60000)) // TODO: not hardcoded
+                return candleStickCache.get(marketName);
+        }
+
+        List<Candlestick> candlestickBars = client.getCandlestickBars(marketName + base, interval);
+        candleStickCache.put(marketName, candlestickBars);
+        return candlestickBars;
     }
 }

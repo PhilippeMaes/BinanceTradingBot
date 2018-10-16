@@ -1,7 +1,7 @@
 package be.crypto.bot.service.websocket;
 
 import be.crypto.bot.config.Constants;
-import be.crypto.bot.data.holders.MarketStateManager;
+import be.crypto.bot.data.holders.MarketManager;
 import be.crypto.bot.domain.MarketTicker;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,7 +26,7 @@ public class WebSocketService {
     private ObjectMapper mapper;
 
     @Autowired
-    private MarketStateManager marketStateManager;
+    private MarketManager marketManager;
 
     @PostConstruct
     private void init() throws IOException {
@@ -80,6 +80,6 @@ public class WebSocketService {
 
     private void updateTicker(MarketTicker marketTicker) {
         marketTicker.setSymbol(marketTicker.getSymbol().substring(0, marketTicker.getSymbol().length() - 3));
-        marketStateManager.updateTicker(marketTicker.getSymbol(), marketTicker);
+        marketManager.updateTicker(marketTicker.getSymbol(), marketTicker);
     }
 }

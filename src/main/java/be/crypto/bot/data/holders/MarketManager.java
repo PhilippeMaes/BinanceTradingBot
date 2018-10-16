@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
  * Created by philippemaes on 15/06/2018.
  */
 @Service
-public class MarketStateManager {
+public class MarketManager {
 
-    private static final Logger log = LoggerFactory.getLogger(MarketStateManager.class);
+    private static final Logger log = LoggerFactory.getLogger(MarketManager.class);
 
     private Map<String, MarketStateHolder> holders;
     private Map<String, MarketState> marketStates;
@@ -43,7 +43,7 @@ public class MarketStateManager {
     @Autowired
     private WebService webService;
 
-    public MarketStateManager() {
+    public MarketManager() {
         this.holders = new HashMap<>();
         this.marketStates = new HashMap<>();
         this.marketTickers = new HashMap<>();
@@ -73,10 +73,6 @@ public class MarketStateManager {
         log.info("Average market RSI: " + averageRSI);
     }
 
-    public Optional<MarketTicker> getTicker(String market) {
-        return marketTickers.containsKey(market) ? Optional.of(marketTickers.get(market)) : Optional.empty();
-    }
-
     public Double getAverageGap() {
         return averageGap;
     }
@@ -98,6 +94,10 @@ public class MarketStateManager {
 
         if (marketStates.containsKey(market))
             analyseService.checkTicker(marketStates.get(market), marketTicker);
+    }
+
+    public Optional<MarketTicker> getTicker(String market) {
+        return marketTickers.containsKey(market) ? Optional.of(marketTickers.get(market)) : Optional.empty();
     }
 
     public Optional<MarketState> getMarketState(String market) {

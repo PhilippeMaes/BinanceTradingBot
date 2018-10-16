@@ -22,9 +22,9 @@ public class Constants {
     public static final Integer BOLLINGER_PERIOD = 20;
 
     public static final String BASE = "BTC";
-    public static final Double MAX_INITIAL_BASE = 0.040;
-    public static final Double MAX_ORDER_SIZE = 0.010;
-    public static final Double AVERAGING_DOWN_BALANCE = 0.010;
+    public static final Double MAX_INITIAL_BASE = 0.080;
+    public static final Double MAX_ORDER_SIZE = 0.020;
+    public static final Double AVERAGING_DOWN_BALANCE = 0.020;
 
-    public static final String[] BLACK_LIST = { "BCN", "NPXS", "TUSD", "HOT", "DENT" };
+    public static final String[] BLACK_LIST = { "TUSD" };
 }

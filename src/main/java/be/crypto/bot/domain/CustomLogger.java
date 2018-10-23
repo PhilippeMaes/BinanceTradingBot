@@ -18,25 +18,30 @@ public class CustomLogger {
     public void debug(String s) {
         if (!lastLogged.equals(s))
             logger.debug(s);
+        lastLogged = s;
     }
 
     public void info(String s) {
         if (!lastLogged.equals(s))
             logger.info(s);
+        lastLogged = s;
     }
 
     public void warn(String s) {
         if (!lastLogged.equals(s))
             logger.warn(s);
+        lastLogged = s;
     }
 
     public void error(String s) {
         if (!lastLogged.equals(s))
             logger.error(s);
+        lastLogged = s;
     }
 
     public void error(String s, Exception ex) {
         if (!lastLogged.equals(s))
             logger.error(s, ex);
+        lastLogged = s;
     }
 }

@@ -126,6 +126,7 @@ public class RestService {
 
         webService.placeMarketSellOrder(Constants.BASE, market, quantity);
         balanceHolder.sold(market, quantity, Double.valueOf(marketManager.getTicker(market).get().getBid()));
+        orderHolder.removeTrade(market, OrderType.SELL);
 
         return ResponseEntity.status(HttpStatus.OK).body("Success");
     }

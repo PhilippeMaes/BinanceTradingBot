@@ -20,7 +20,7 @@ public class ConfigHolder {
     private void init() {
         this.buyPercentageTrigger = Constants.BUY_PERC_TRIGGER;
         this.sellPercentageTrigger = Constants.SELL_PERC_TRIGGER;
-        this.maxOrderSize = Constants.MAX_INITIAL_BASE;
+        this.maxOrderSize = Constants.MAX_ORDER_SIZE;
         this.SMALength = Constants.EMA_PERIOD;
     }
 

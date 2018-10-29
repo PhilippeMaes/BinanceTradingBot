@@ -6,6 +6,7 @@ import be.crypto.bot.data.ClosedTradeService;
 import be.crypto.bot.data.ConfigHolder;
 import be.crypto.bot.data.holders.BalanceHolder;
 import be.crypto.bot.data.holders.MarketManager;
+import be.crypto.bot.data.holders.OpenPositionHolder;
 import be.crypto.bot.data.holders.OrderHolder;
 import be.crypto.bot.domain.BalanceSnapshot;
 import be.crypto.bot.domain.DTO.ConfigDTO;
@@ -47,6 +48,9 @@ public class RestService {
 
     @Autowired
     private MarketManager marketManager;
+
+    @Autowired
+    private OpenPositionHolder openPositionHolder;
 
     @Autowired
     private BalanceSnapshotRepository balanceSnapshotRepository;
@@ -127,6 +131,7 @@ public class RestService {
         webService.placeMarketSellOrder(Constants.BASE, market, quantity);
         balanceHolder.sold(market, quantity, Double.valueOf(marketManager.getTicker(market).get().getBid()));
         orderHolder.removeTrade(market, OrderType.SELL);
+        openPositionHolder.removePosition(market);
 
         return ResponseEntity.status(HttpStatus.OK).body("Success");
     }
